@@ -1,20 +1,55 @@
-﻿// ConsoleApplication2.cpp : Этот файл содержит функцию "main". Здесь начинается и заканчивается выполнение программы.
-//
+﻿#include <iostream> 
+#include <vector> 
 
-#include <iostream>
+class Student {
+
+public:
+    enum class Type
+    {
+        Good,
+        Average,
+        Poor
+
+    };
+
+    Student(Type type) {
+
+        this->type = type;
+    }
+private:
+    Type type;
+};
+
+class Teacher {
+    void print() {};
+};
+
+class QuadEquation {
+    double a, b, c;
+};
 
 int main()
 {
-    std::cout << "Hello Worldtest!\n";
+    //инициализация студентов и учителя 
+    std::vector<Student> students;
+    Teacher teacher;
+
+    students.push_back(Student(Student::Type::Good));
+    students.push_back(Student(Student::Type::Average));
+    students.push_back(Student(Student::Type::Good));
+    students.push_back(Student(Student::Type::Good));
+    students.push_back(Student(Student::Type::Average));
+    students.push_back(Student(Student::Type::Poor));
+
+
+    //студенты получают задачи и решают (записывая в файлик с решениями) 
+    for (const auto& student : students) {
+
+        std::cout << "Студент " << std::endl;
+    }
+    //студенты отправляют задачи teacher 
+
+    //учитель все проверяет и записывает в другой файлик успеваемость 
+
+    //учитель пишет статистику 
 }
-
-// Запуск программы: CTRL+F5 или меню "Отладка" > "Запуск без отладки"
-// Отладка программы: F5 или меню "Отладка" > "Запустить отладку"
-
-// Советы по началу работы 
-//   1. В окне обозревателя решений можно добавлять файлы и управлять ими.
-//   2. В окне Team Explorer можно подключиться к системе управления версиями.
-//   3. В окне "Выходные данные" можно просматривать выходные данные сборки и другие сообщения.
-//   4. В окне "Список ошибок" можно просматривать ошибки.
-//   5. Последовательно выберите пункты меню "Проект" > "Добавить новый элемент", чтобы создать файлы кода, или "Проект" > "Добавить существующий элемент", чтобы добавить в проект существующие файлы кода.
-//   6. Чтобы снова открыть этот проект позже, выберите пункты меню "Файл" > "Открыть" > "Проект" и выберите SLN-файл.

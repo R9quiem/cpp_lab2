@@ -4,7 +4,7 @@
 class Student {
 
 public:
-    enum class Type
+    enum Type
     {
         Good,
         Average,
@@ -16,8 +16,9 @@ public:
 
         this->type = type;
     }
-private:
     Type type;
+    void solve(const QuadEquation &equation){}
+private:
 };
 
 class Teacher {
@@ -30,6 +31,7 @@ class QuadEquation {
 
 int main()
 {
+    setlocale(LC_ALL, "ru");
     //инициализация студентов и учителя 
     std::vector<Student> students;
     Teacher teacher;
@@ -40,12 +42,12 @@ int main()
     students.push_back(Student(Student::Type::Good));
     students.push_back(Student(Student::Type::Average));
     students.push_back(Student(Student::Type::Poor));
-
-
+    
     //студенты получают задачи и решают (записывая в файлик с решениями) 
     for (const auto& student : students) {
 
-        std::cout << "Студент " << std::endl;
+        std::cout << "Студент " << student.type <<  std::endl;
+
     }
     //студенты отправляют задачи teacher 
 

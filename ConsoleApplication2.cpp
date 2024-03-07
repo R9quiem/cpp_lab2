@@ -3,7 +3,9 @@
 #include <vector> 
 #include <string>
 #include <sstream>
+#include <map>
 #include <optional>
+#include <cstdio>
 
 class Student {
     
@@ -14,7 +16,7 @@ public:
         this->name = name;
     }
 
-    void solveEquations(const std::string& equationsFile, const std::string& solutionsFile) const {
+    void solveTest(const std::string& equationsFile, const std::string& solutionsFile) const {
             std::ifstream inFile(equationsFile);
             std::ofstream outFile(solutionsFile, std::ios::app); 
 
@@ -35,20 +37,28 @@ public:
                 std::cerr << "Неккоректный формат уравнения: " << line << std::endl;
                 continue; // Пропускаем некорректные уравнения
             }
-            
-            double D = b * b - 4 * a * c;
-
-            if (D < 0) {
+            auto answer = solveEquation(a, b, c);
+            if (answer.has_value()) {
+                outFile << line << " | " << answer.value().first << " " << answer.value().second << " | " << this->name << " " << std::endl;
+            }
+            else {
                 outFile << line << " | none | " << this->name << " " << std::endl;
-            } else {
-                double root1 = (-b + sqrt(D)) / (2 * a);
-                double root2 = (-b - sqrt(D)) / (2 * a);
-                outFile << line << " | " << root1 << " " << root2 << " | " << this->name << " " << std::endl;
             }
         }
         outFile << std::endl;
         inFile.close();
         outFile.close();
+    }
+    std::optional<std::pair<double, double>> solveEquation(double a, double b, double c) const {
+        double D = b * b - 4 * a * c;
+        if (D < 0) {
+            return std::nullopt;
+        }
+        else {
+            double root1 = (-b + std::sqrt(D)) / (2 * a);
+            double root2 = (-b - std::sqrt(D)) / (2 * a);
+            return std::make_pair(root1, root2);
+        }
     }
 private:
     Type type;
@@ -57,20 +67,16 @@ private:
 
 class Teacher {
     bool isChecked = false;
+    std::map<std::string, int> results;
 public:
-    void checkSolutions(std::string solutionsFile, std::string resultsFile) {
+    Teacher* checkSolutions(std::string solutionsFile) {
         std::ifstream inFile(solutionsFile);
-        std::ofstream outFile(resultsFile, std::ios::app);
 
         if (!inFile.is_open()) {
             std::cerr << "Ошибка открытия файла с уравнениями\n";
-            return;
+            return this;
         }
 
-        if (!outFile.is_open()) {
-            std::cerr << "Ошибка открытия файла для записи решений\n";
-            return;
-        }
         std::string line;
         while (std::getline(inFile, line)) {
             std::istringstream iss(line);
@@ -80,23 +86,51 @@ public:
 
             // Используем разделитель ':' для разделения на три части
             if (std::getline(iss, equation, '|') && std::getline(iss, answer, '|') && std::getline(iss, student)) {
-                // Теперь equation содержит уравнение, answer - ответ, student - имя студента
-                std::cout << "Equation: " << equation << std::endl;
-                std::cout << "Answer: " << answer << std::endl;
-                std::cout << "Student: " << student << std::endl;
+                std::istringstream issEquation(equation);
+                double a, b, c;
+                if (!(issEquation >> a >> b >> c)) {
+                    std::cerr << "Неккоректный формат уравнения: " << line << std::endl;
+                    continue; // Пропускаем некорректные уравнения
+                }
+                answer.erase(std::remove(answer.begin(), answer.end(), ' '), answer.end());
+                std::string rightAnswer = solveEquation(a, b, c);
+                if (rightAnswer == answer) {
+                    results[student]++;
+                }
+                std::istringstream issAnswer(answer);
             }
         }
-        outFile << std::endl;
         inFile.close();
-        outFile.close();
         this->isChecked = true;
+        return this;
     };
-    void showResults(std::string resultsFile) {
+    
+    
+    Teacher* writeResults(std::string resultsFile) {
         if (!isChecked) {
-            std::cout << "Нельзя показать результаты не проверив ответы" << std::endl;
-            return;
+            std::cout << "Нельзя записать результаты не проверив ответы" << std::endl;
+            return this;
         }
     };
+    Teacher* showResults(std::string resultsFile) {
+        if (!isChecked) {
+            std::cout << "Нельзя показать результаты не проверив ответы" << std::endl;
+            return this;
+        }
+    };
+    std::string solveEquation(double a, double b, double c) const { // Исправлено возвращаемое значение
+        double D = b * b - 4 * a * c;
+        if (D < 0) {
+            return "none"; // Возвращаем строку "(none)" вместо nullopt
+        }
+        else {
+            double root1 = (-b + std::sqrt(D)) / (2 * a);
+            double root2 = (-b - std::sqrt(D)) / (2 * a);
+            std::ostringstream oss;
+            oss << std::noshowpoint << root1 << root2;
+            return oss.str();
+        }
+    }
 };
 
 int main()
@@ -122,16 +156,18 @@ int main()
     //очистка файла
     std::ofstream file(solutionsFile, std::ios::trunc);
     for (const auto& student : students) {
-        student.solveEquations(equationsFile, solutionsFile);
+        student.solveTest(equationsFile, solutionsFile);
     }
 
     //учитель все проверяет и записывает
     //очистка файла
     //std::ofstream file(resultsFile, std::ios::trunc);
-    teacher.checkSolutions(solutionsFile, resultsFile);
+    teacher.checkSolutions(solutionsFile);
 
-    //учитель пишет статистику 
+    //записывает в файл результаты
+    teacher.writeResults(resultsFile);
 
+    //учитель показывает результаты
     teacher.showResults(resultsFile);
 
 

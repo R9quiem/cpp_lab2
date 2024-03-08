@@ -6,16 +6,15 @@
 #include <map>
 #include <optional>
 #include <cstdio>
-
+#include <random>
 class Student {
-    
+
 public:
     enum Type{ Good, Average, Poor };
     Student(Type type, const std::string& name) {
         this->type = type;
         this->name = name;
     }
-
     void solveTest(const std::string& equationsFile, const std::string& solutionsFile) const {
             std::ifstream inFile(equationsFile);
             std::ofstream outFile(solutionsFile, std::ios::app); 
@@ -51,15 +50,40 @@ public:
     }
     std::optional<std::pair<double, double>> solveEquation(double a, double b, double c) const {
         double D = b * b - 4 * a * c;
-        if (D < 0) {
-            return std::nullopt;
+        switch (this->type) {
+        case(Good):
+            if (D < 0) {
+                return std::nullopt;
+            }
+            else {
+                double root1 = (-b + std::sqrt(D)) / (2 * a);
+                double root2 = (-b - std::sqrt(D)) / (2 * a);
+                return std::make_pair(root1, root2);
+            }
+            break;
+        case(Poor):
+            return std::make_pair(0,0);
+            break;
+        case(Average):
+            std::random_device rd;
+            std::mt19937 gen(rd());
+            std::uniform_real_distribution<> dis(0.0, 1.0);
+            double chance = dis(gen);
+            if (D < 0) {
+                if (chance <= 0.55) 
+                    return std::make_pair(1, 1);
+                return std::nullopt;
+            }
+            else {
+                if (chance <= 0.55)
+                    return std::make_pair(0, 0);
+                double root1 = (-b + std::sqrt(D)) / (2 * a);
+                double root2 = (-b - std::sqrt(D)) / (2 * a);
+                return std::make_pair(root1, root2);
+            }
+            break;
         }
-        else {
-            double root1 = (-b + std::sqrt(D)) / (2 * a);
-            double root2 = (-b - std::sqrt(D)) / (2 * a);
-            return std::make_pair(root1, root2);
-        }
-    }
+    };
 private:
     Type type;
     std::string name;
@@ -95,9 +119,11 @@ public:
                 answer.erase(std::remove(answer.begin(), answer.end(), ' '), answer.end());
                 student.erase(std::remove(student.begin(), student.end(), ' '), student.end());
                 std::string rightAnswer = solveEquation(a, b, c);
+                int score{};
                 if (rightAnswer == answer) {
-                    results[student]++;
+                    score = 1;
                 }
+                results[student] += score;
                 std::istringstream issAnswer(answer);
             }
         }

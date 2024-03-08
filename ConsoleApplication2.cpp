@@ -21,12 +21,12 @@ public:
             std::ofstream outFile(solutionsFile, std::ios::app); 
 
             if (!inFile.is_open()) {
-                std::cerr << "Ошибка открытия файла с уравнениями\n";
+                std::cerr << "Ошибка открытия файла с уравнениями\n\n";
                 return;
             }
 
             if (!outFile.is_open()) {
-                std::cerr << "Ошибка открытия файла для записи решений\n";
+                std::cerr << "Ошибка открытия файла для записи решений\n\n";
                 return;
             }
             std::string line;
@@ -34,15 +34,15 @@ public:
             std::istringstream iss(line);
             double a, b, c;
             if (!(iss >> a >> b >> c)) {
-                std::cerr << "Неккоректный формат уравнения: " << line << std::endl;
+                std::cerr << "Неккоректный формат уравнения: " << line << "\n\n";
                 continue; // Пропускаем некорректные уравнения
             }
             auto answer = solveEquation(a, b, c);
             if (answer.has_value()) {
-                outFile << line << " | " << answer.value().first << " " << answer.value().second << " | " << this->name << " " << std::endl;
+                outFile << line << " | " << answer.value().first << " " << answer.value().second << " | " << this->name << "\n";
             }
             else {
-                outFile << line << " | none | " << this->name << " " << std::endl;
+                outFile << line << " | none | " << this->name << "\n";
             }
         }
         outFile << std::endl;
@@ -73,7 +73,7 @@ public:
         std::ifstream inFile(solutionsFile);
 
         if (!inFile.is_open()) {
-            std::cerr << "Ошибка открытия файла с уравнениями\n";
+            std::cerr << "Ошибка открытия файла с решениями\n\n";
             return this;
         }
 
@@ -89,10 +89,11 @@ public:
                 std::istringstream issEquation(equation);
                 double a, b, c;
                 if (!(issEquation >> a >> b >> c)) {
-                    std::cerr << "Неккоректный формат уравнения: " << line << std::endl;
+                    std::cerr << "Неккоректный формат уравнения: " << line << "\n\n";
                     continue; // Пропускаем некорректные уравнения
                 }
                 answer.erase(std::remove(answer.begin(), answer.end(), ' '), answer.end());
+                student.erase(std::remove(student.begin(), student.end(), ' '), student.end());
                 std::string rightAnswer = solveEquation(a, b, c);
                 if (rightAnswer == answer) {
                     results[student]++;
@@ -103,25 +104,44 @@ public:
         inFile.close();
         this->isChecked = true;
         return this;
+       
     };
     
     
     Teacher* writeResults(std::string resultsFile) {
         if (!isChecked) {
-            std::cout << "Нельзя записать результаты не проверив ответы" << std::endl;
+            std::cout << "Нельзя записать результаты не проверив ответы\n\n";
             return this;
         }
+        std::ofstream outFile(resultsFile);
+        if (!outFile.is_open()) {
+            std::cerr << "Ошибка открытия файла с результатами\n\n";
+            return this;
+        }
+        outFile << "Таблица успеваемости:\n";
+        for (auto student : results) {
+            outFile << student.first << ": " << student.second << "\n";
+        }
+        outFile.close();
+        
     };
     Teacher* showResults(std::string resultsFile) {
         if (!isChecked) {
-            std::cout << "Нельзя показать результаты не проверив ответы" << std::endl;
+            std::cout << "Нельзя показать результаты не проверив ответы\n\n";
             return this;
         }
+        std::ifstream inFile(resultsFile);
+        if (!inFile.is_open()) {
+            std::cerr << "Ошибка открытия файла с результатами\n\n";
+            return this;
+        }
+
+        inFile.close();
     };
-    std::string solveEquation(double a, double b, double c) const { // Исправлено возвращаемое значение
+    std::string solveEquation(double a, double b, double c) const { 
         double D = b * b - 4 * a * c;
         if (D < 0) {
-            return "none"; // Возвращаем строку "(none)" вместо nullopt
+            return "none"; 
         }
         else {
             double root1 = (-b + std::sqrt(D)) / (2 * a);

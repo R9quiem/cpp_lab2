@@ -34,7 +34,7 @@ public:
             std::istringstream iss(line);
             double a, b, c;
             if (!(iss >> a >> b >> c)) {
-                std::cerr << "Неккоректный формат уравнения: " << line << "\n\n";
+                std::cerr << "Неккоректный формат уравнения: \"" << line << "\"\n\n";
                 continue; // Пропускаем некорректные уравнения
             }
             auto answer = solveEquation(a, b, c);
@@ -125,19 +125,6 @@ public:
         outFile.close();
         
     };
-    Teacher* showResults(std::string resultsFile) {
-        if (!isChecked) {
-            std::cout << "Нельзя показать результаты не проверив ответы\n\n";
-            return this;
-        }
-        std::ifstream inFile(resultsFile);
-        if (!inFile.is_open()) {
-            std::cerr << "Ошибка открытия файла с результатами\n\n";
-            return this;
-        }
-
-        inFile.close();
-    };
     std::string solveEquation(double a, double b, double c) const { 
         double D = b * b - 4 * a * c;
         if (D < 0) {
@@ -186,9 +173,6 @@ int main()
 
     //записывает в файл результаты
     teacher.writeResults(resultsFile);
-
-    //учитель показывает результаты
-    teacher.showResults(resultsFile);
 
 
 }

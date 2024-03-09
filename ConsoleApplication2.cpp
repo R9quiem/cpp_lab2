@@ -20,12 +20,12 @@ public:
             std::ofstream outFile(solutionsFile, std::ios::app); 
 
             if (!inFile.is_open()) {
-                std::cerr << "Ошибка открытия файла с уравнениями\n\n";
+                std::cerr << "Ошибка. Не получается открыть файл с уравнением.\n\n";
                 return;
             }
 
             if (!outFile.is_open()) {
-                std::cerr << "Ошибка открытия файла для записи решений\n\n";
+                std::cerr << "Ошибка. Не получается открыть файл для записи решений.\n\n";
                 return;
             }
             std::string line;
@@ -33,14 +33,17 @@ public:
             std::istringstream iss(line);
             double a, b, c;
             if (!(iss >> a >> b >> c)) {
-                std::cerr << "Неккоректный формат уравнения: \"" << line << "\"\n\n";
+                std::cerr << "Ошибка. Неккоректный формат уравнения: \"" << line << "\"\n\n";
                 continue; // Пропускаем некорректные уравнения
+            }
+            if (a==0) {
+                std::cerr << "Ошибка. В квадратном уравнении коэффициент 'a' не может быть равен 0: \"" << line << "\"\n\n";
+                continue; // Пропускаем 
             }
             auto answer = solveEquation(a, b, c);
             if (answer.has_value()) {
                 outFile << line << " | " << answer.value().first << " " << answer.value().second << " | " << this->name << "\n";
-            }
-            else {
+            } else {
                 outFile << line << " | none | " << this->name << "\n";
             }
         }
@@ -97,7 +100,7 @@ public:
         std::ifstream inFile(solutionsFile);
 
         if (!inFile.is_open()) {
-            std::cerr << "Ошибка открытия файла с решениями\n\n";
+            std::cerr << "Ошибка. Не получается открыть файл с решениями.\n\n";
             return this;
         }
 
@@ -113,8 +116,12 @@ public:
                 std::istringstream issEquation(equation);
                 double a, b, c;
                 if (!(issEquation >> a >> b >> c)) {
-                    std::cerr << "Неккоректный формат уравнения: " << line << "\n\n";
+                    std::cerr << "Ошибка. Неккоректный формат уравнения: " << line << "\n\n";
                     continue; // Пропускаем некорректные уравнения
+                }
+                if (a==0) {
+                    std::cerr << "Ошибка. В квадратном уравнении коэффициент 'a' не может быть равен 0: " << line << "\n\n";
+                    continue; // Пропускаем 
                 }
                 answer.erase(std::remove(answer.begin(), answer.end(), ' '), answer.end());
                 student.erase(std::remove(student.begin(), student.end(), ' '), student.end());
@@ -136,12 +143,12 @@ public:
     
     Teacher* writeResults(std::string resultsFile) {
         if (!isChecked) {
-            std::cout << "Нельзя записать результаты не проверив ответы\n\n";
+            std::cerr << "Ошибка. Нельзя записать результаты не проверив ответы\n\n";
             return this;
         }
         std::ofstream outFile(resultsFile);
         if (!outFile.is_open()) {
-            std::cerr << "Ошибка открытия файла с результатами\n\n";
+            std::cerr << "Ошибка. Не получается открыть файл с результатами.\n\n";
             return this;
         }
         outFile << "Таблица успеваемости:\n";
